@@ -2,32 +2,39 @@
 
 ```mermaid
 flowchart LR
-  Player((Player))
-  Game[Game Client\n(Dream Sheep Jump)]
+  Buyer((Buyer))
+  App[Buyer App]
   Wallet[Wallet Adapter]
+  Agent[Delegated Checkout Agent]
+  Merchant[Demo Merchant / Drop Service]
   Program[Anchor Program]
   Config[(Config PDA)]
-  Score[(PlayerScore PDA)]
-  ReadPath[Leaderboard Service / Solana Read Adapter]
-  UI[Leaderboard UI]
+  Policy[(PurchasePolicy PDA)]
+  Receipt[(PurchaseReceipt PDA)]
+  ReadPath[Policy / Receipt Read Adapter]
+  UI[Status UI]
 
-  Player --> Game
-  Game --> Wallet
+  Buyer --> App
+  App --> Wallet
   Wallet --> Program
+  Agent --> Merchant
+  Agent --> Program
   Program --> Config
-  Program --> Score
-  ReadPath --> Score
+  Program --> Policy
+  Program --> Receipt
+  ReadPath --> Policy
+  ReadPath --> Receipt
   UI --> ReadPath
-  Player --> UI
+  Buyer --> UI
 
-  subgraph FutureLayer[Future Session Verification Layer (Non-MVP)]
-    Sess[VerifiedSession]
-    Transcript[Action Transcript / Hash Chain]
-    Verifier[Replay / Proof / Attestation Layer]
+  subgraph FutureLayer[Future Merchant Reconciliation Layer (Non-MVP)]
+    Sess[ExecutionSession]
+    Transcript[Audit Transcript / Hash Chain]
+    Reconcile[Merchant Callback / Attestation Layer]
   end
 
-  Game -. roadmap .-> Sess
+  Agent -. roadmap .-> Sess
   Sess -. roadmap .-> Transcript
-  Transcript -. roadmap .-> Verifier
-  Verifier -. roadmap .-> Program
+  Transcript -. roadmap .-> Reconcile
+  Reconcile -. roadmap .-> Receipt
 ```

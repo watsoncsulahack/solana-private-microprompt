@@ -1,45 +1,44 @@
-# Solana Paid Leaderboard (Dream Sheep Jump)
+# Solana Delegated Checkout Agent
 
-A leaderboard architecture where local play is free and global publication is paid + on-chain.
+A Solana-backed payment and authorization layer for **time-sensitive purchases** such as limited drops, ticket releases, and first-come-first-served registrations.
 
 ## 2-minute project summary
 ### What the MVP does now
-- Player plays locally and saves local scores for free.
-- Player can submit score to global board by signing a Solana Devnet transaction.
-- Program enforces fee + score update in one flow.
-- Program stores **best score per player** (not every run).
-- Frontend/API reads on-chain accounts and renders global top scores.
+- User creates a **purchase policy** with strict limits.
+- User funds or pre-approves a capped spend for that policy.
+- A delegated checkout agent can execute a purchase **only within those user-defined rules**.
+- Solana Devnet records the policy, payment/authorization flow, and a purchase receipt.
+- Frontend renders policy status, execution status, and auditable receipts.
 
 ### What MVP intentionally does not do
-- Full anti-cheat or tamper-proof gameplay verification.
-- Per-action on-chain logging.
-- zk/zkVM score validity proofs.
-- Binary attestation verification.
+- Defeat anti-bot systems or bypass merchant protections.
+- Guarantee access to scarce inventory.
+- Provide unrestricted wallet delegation.
+- Integrate with every merchant or payment processor.
+- Launch on mainnet.
 
 ## Why this MVP shape
 - **Hackathon-feasible** under tight timeline.
-- **On-chain source of truth** for global leaderboard is enough for demo integrity.
-- **Best-score-per-player** keeps storage/rent/indexing manageable.
-- Leaves clean extension points for session verification later.
+- Solves a real checkout pain point without overclaiming “drop sniping.”
+- Demonstrates how Solana can act as a **constrained authorization + payment rail**.
+- Keeps wallet risk bounded through explicit price, quantity, merchant, and expiry limits.
+- Leaves clean extension points for merchant adapters, attestations, and richer automation later.
 
 ## Why Solana + Anchor
-- Solana gives fast/cheap transaction rails suitable for micro-fee leaderboard submits.
+- Solana gives fast, low-cost transactions suitable for time-sensitive checkout authorization and receipts.
 - Anchor accelerates program development with typed accounts, account constraints, and IDL-driven client integration.
+- PDAs are a natural fit for user-scoped policies and purchase receipts.
 
 ## Documentation map
 - `docs/PROJECT_OVERVIEW.md`
 - `docs/PRD.md`
 - `docs/SRD.md`
 - `docs/ARCHITECTURE.md`
-- `docs/ANTI_CHEAT_ROADMAP.md`
+- `docs/ANTI_CHEAT_ROADMAP.md` *(repurposed as future delegated-checkout roadmap until renamed)*
 - `docs/MVP_VS_ROADMAP.md`
-- `docs/GLOSSARY.md`
-- `docs/TRUST_MODEL.md`
-- `docs/ARCHITECTURAL_DECISIONS.md`
-- `docs/IMPLEMENTATION_NOTES.md`
-- `docs/diagrams/` (context, use-case, dataflow, class, sequence, lifecycle)
+- `docs/diagrams/` (context, use-case, dataflow)
 
 ## Design guardrails
-- Don’t overclaim anti-cheat in MVP.
-- Keep current-state and roadmap-state explicitly separated.
-- Keep global board derivable from chain data.
+- Don’t frame the product as an unfair “bot sniper.”
+- Keep the current-state MVP and the future merchant-integrated roadmap explicitly separated.
+- Keep all agent authority **bounded, user-consented, and auditable**.

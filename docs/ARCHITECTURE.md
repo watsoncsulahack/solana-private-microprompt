@@ -1,19 +1,21 @@
 # Architecture
 
 ## 1) System context
-- **Player** interacts with game client.
-- **Wallet** signs score submission transaction.
-- **Anchor program** enforces fee + state update rules.
-- **On-chain PDAs** persist global leaderboard source-of-truth.
-- **Leaderboard UI/API** reads chain state and renders rankings.
+- **Buyer** defines a purchase policy.
+- **Wallet** signs policy creation and funding/authorization transactions.
+- **Checkout Agent** watches for availability and attempts purchase within policy bounds.
+- **Merchant / Demo Drop Service** represents the time-sensitive purchase target.
+- **Anchor program** enforces policy + receipt rules.
+- **On-chain PDAs** persist policy and receipt source-of-truth.
+- **Frontend/API** reads chain state and renders policies and receipts.
 
 (See `docs/diagrams/system-context.md`.)
 
 ## 2) Architectural rationale
 
-### Why Solana for global leaderboard
-- Fast confirmation and low fees fit micro-fee score submissions.
-- Public verifiability of published global state.
+### Why Solana for delegated checkout
+- Fast confirmation and low fees fit time-sensitive authorization flows.
+- Publicly auditable policy state and receipt history.
 - Easy explorer-based demo proof for judges.
 
 ### Why Anchor
@@ -22,44 +24,43 @@
 - IDL-driven client integration.
 
 ### Why PDAs
-- Deterministic account addresses for per-player score state.
+- Deterministic account addresses for per-policy and per-receipt state.
 - No private key required for program-owned account derivation.
-- Natural fit for `(game_id, player)` best-score records.
+- Natural fit for `(authority, merchant_id, item/window)` policy records.
 
-### Why best-score-only on-chain
-- Lower cost and lower complexity.
-- Enough to prove a ranked global board.
-- Avoids bloating chain with per-action/per-run data in MVP.
+### Why bounded policy state on-chain
+- Lower risk than unrestricted delegated keys.
+- Enough to prove what the user allowed and what the agent executed.
+- Avoids pretending Solana is the full commerce engine.
 
 ## 3) Current trust boundary
-- **Trusted for MVP:** payment/publication integrity and deterministic ranking from on-chain accounts.
-- **Not yet trust-minimized:** game runtime integrity and client score authenticity.
+- **Trusted for MVP:** on-chain authorization integrity, receipt integrity, and bounded policy enforcement.
+- **Not yet trust-minimized:** external merchant fulfillment, generalized web automation, and agent behavior outside the authorized transaction flow.
 
 ## 4) Current-state flow
-1. Player plays locally.
-2. Local score saved freely.
-3. Player connects wallet and submits global score.
-4. Program validates fee/config and updates PlayerScore PDA.
-5. Leaderboard read path queries chain and renders top-N.
+1. Buyer creates a purchase policy.
+2. Buyer funds or authorizes a capped spend.
+3. Checkout agent monitors a demo drop or mock merchant.
+4. Agent executes purchase if conditions fit policy.
+5. Program validates policy constraints and records receipt.
+6. Frontend reads chain state and renders policy + receipt status.
 
-(See sequence diagrams in `docs/diagrams/`.)
+## 5) Why universal merchant automation is deferred
+- Real merchant ecosystems vary widely.
+- Safe checkout automation requires careful scope and consent controls.
+- Hackathon objective is clear bounded-authorization integrity first.
 
-## 5) Why anti-cheat is deferred
-- Full anti-cheat is a separate research-heavy subsystem.
-- Hackathon objective is clear on-chain publication integrity first.
-- We intentionally preserve extensibility points for stronger verification later.
-
-## 6) Future verification architecture (non-MVP)
-- Session/channel id created at run start.
-- Optional pre-session integrity assertions.
-- Hash-linked action records with monotonic counters.
-- Transcript commitment root attached to submission.
-- Optional replay/proof verifier and verified-run badge classes.
+## 6) Future delegated-checkout architecture (non-MVP)
+- Merchant-specific adapters.
+- Signed merchant callbacks or webhook reconciliation.
+- Delegated session keys or scoped execution rights.
+- Better order-status state machines and refund flows.
+- Optional attestations for agent runs.
 
 Detailed roadmap: `docs/ANTI_CHEAT_ROADMAP.md`.
 
 ## 7) Open implementation gaps (code)
-- Program implementation of Config PDA + PlayerScore PDA.
+- Program implementation of Config PDA, PurchasePolicy PDA, and PurchaseReceipt PDA.
 - Instruction handlers and account constraints in Anchor.
-- Wallet/submit UX and tx confirmation states.
-- Chain indexer/read adapter and deterministic sort tests.
+- Wallet/policy UX and tx confirmation states.
+- Demo merchant or mocked drop integration.

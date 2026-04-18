@@ -2,36 +2,40 @@
 
 ```mermaid
 flowchart LR
-  Player((Player))
+  Buyer((Buyer))
+  Agent((Checkout Agent))
   Admin((Admin))
   Wallet((Wallet))
   Chain((Solana Devnet))
-  API((Leaderboard API))
+  Merchant((Demo Merchant))
+  API((Policy / Receipt API))
 
   subgraph MVP[Current MVP]
-    U1([Play game locally])
-    U2([Save local score for free])
+    U1([Create purchase policy])
+    U2([Fund or authorize capped budget])
     U3([Connect wallet])
-    U4([Submit best score])
-    U5([Pay submission fee])
-    U6([Reject non-improving score update])
-    U7([View global leaderboard])
+    U4([Execute delegated purchase])
+    U5([Enforce price/quantity/expiry limits])
+    U6([Cancel policy])
+    U7([View policy and receipt status])
     U8([Update config state])
   end
 
   subgraph FUTURE[Future / Non-MVP]
-    F1([Start verified session])
-    F2([Export session transcript])
-    F3([Submit run for verification])
-    F4([View verified badge])
+    F1([Start execution session])
+    F2([Record audit transcript])
+    F3([Reconcile with merchant callback])
+    F4([View attested receipt])
   end
 
-  Player --> U1 --> U2
-  Player --> U3 --> Wallet
-  Player --> U4 --> U5 --> Wallet --> Chain
-  U4 --> U6
-  Player --> U7 --> API --> Chain
+  Buyer --> U1 --> Wallet --> Chain
+  Buyer --> U2 --> Wallet --> Chain
+  Buyer --> U3 --> Wallet
+  Agent --> U4 --> Merchant
+  U4 --> U5 --> Chain
+  Buyer --> U6 --> Wallet --> Chain
+  Buyer --> U7 --> API --> Chain
   Admin --> U8 --> Chain
 
-  Player -. roadmap .-> F1 --> F2 --> F3 --> F4
+  Agent -. roadmap .-> F1 --> F2 --> F3 --> F4
 ```

@@ -2,27 +2,29 @@
 
 ```mermaid
 flowchart TD
-  A[Player/Game Client] -->|Play locally| B[Local score]
-  B -->|Save free| C[Local leaderboard store]
+  A[Buyer App] -->|Create purchase policy| B[Wallet Adapter]
+  B -->|Signed tx| C[Anchor Program: create_policy]
+  C -->|Read rules| D[(Config PDA)]
+  C -->|Create policy| E[(PurchasePolicy PDA)]
 
-  A -->|Connect wallet| D[Wallet Adapter]
-  A -->|Submit score request| D
-  D -->|Signed tx| E[Anchor Program: submit_score]
-  E -->|Read rules| F[(Config PDA)]
-  E -->|Fee transfer to treasury| G[(Treasury)]
-  E -->|Create/update best score| H[(PlayerScore PDA)]
+  F[Delegated Checkout Agent] -->|Watch availability| G[Demo Merchant / Drop Service]
+  F -->|Execute within policy| H[Anchor Program: execute_purchase]
+  H -->|Read policy constraints| E
+  H -->|Service fee / authorized spend path| I[(Treasury or Budget Flow)]
+  H -->|Create immutable receipt| J[(PurchaseReceipt PDA)]
+  H -->|Update policy status| E
 
-  I[Leaderboard API/Indexer] -->|Fetch PlayerScore PDAs| H
-  I -->|Sort and return top-N| J[Leaderboard UI]
+  K[Policy / Receipt API] -->|Fetch policy + receipts| E
+  K -->|Fetch receipts| J
+  K -->|Return statuses| L[Buyer Dashboard]
 
-  subgraph Future verification path (Non-MVP)
-    K[start_session]
-    L[Action records + monotonic counter]
-    M[Hash-linked transcript]
-    N[Transcript commitment]
-    O[Optional verifier/proof adapter]
+  subgraph Future reconciliation path (Non-MVP)
+    M[start_execution_session]
+    N[Integration event log]
+    O[Hash-linked audit transcript]
+    P[Merchant callback / attestation]
   end
 
-  A -. roadmap .-> K -.-> L -.-> M -.-> N -.-> O
-  O -. roadmap .-> E
+  F -. roadmap .-> M -.-> N -.-> O -.-> P
+  P -. roadmap .-> J
 ```

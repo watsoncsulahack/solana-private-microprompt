@@ -1,60 +1,65 @@
 # Product Requirements Document (PRD)
 
 ## 1) Problem
-Players want globally visible high scores with stronger integrity than a local or opaque centralized leaderboard.
+People routinely miss time-sensitive purchase windows because manual checkout is slow, fragile, and hard to coordinate across devices. Existing automation is often unsafe because it requires broad account or payment access.
 
 ## 2) Vision
-A paid global leaderboard where each published score is tied to an on-chain Solana transaction.
+A Solana-backed delegated checkout system where a user can pre-authorize a narrow purchase policy and allow an agent to execute that purchase on their behalf within strict limits.
 
 ## 3) MVP goals
-1. Free local gameplay and local leaderboard.
-2. Paid global score submission.
-3. On-chain best-score-per-player state.
-4. Global ranking reconstructed from chain data.
+1. Let a user create a constrained purchase policy.
+2. Allow a delegated agent to execute a purchase only inside that policy.
+3. Record policy state and purchase receipts on-chain.
+4. Show a clear audit trail of what the agent was allowed to do and what it actually did.
 
 ## 4) Non-goals (MVP)
-- Full anti-cheat/tamper-resistance.
-- Per-action on-chain run logs.
-- zk score validity proofs.
+- Beating anti-bot systems.
+- Mass-scalping scarce inventory.
+- Unrestricted wallet delegation.
+- Full merchant ecosystem integration.
 - Mainnet launch.
 
 ## 5) Personas
-- **Player:** wants fast play and optional global rank.
-- **Competitive player:** willing to pay to publish rank.
-- **Judge/reviewer:** needs clear, verifiable architecture and realistic scope.
+- **Buyer:** wants help completing a time-sensitive purchase without giving away full wallet control.
+- **Agent operator:** wants a narrow, machine-readable policy it can safely execute.
+- **Judge/reviewer:** needs clear proof that the agent acted within user-defined limits.
+- **Merchant/demo operator:** wants a safe constrained purchase flow rather than an adversarial bot.
 
 ## 6) Core user stories
-- Save local score without wallet.
-- Connect wallet and submit global score.
-- Pay submission fee and receive confirmation.
-- View global leaderboard sourced from chain state.
-- See whether score was unpublished (local) or published (global).
+- Create a purchase policy with merchant/item/price/quantity/time limits.
+- Fund or authorize that policy from a wallet.
+- Let an agent monitor and execute the purchase when conditions are met.
+- See whether a policy is active, executed, expired, or cancelled.
+- View a purchase receipt and policy audit trail.
 
 ## 7) MVP feature set
-- Local score capture and local board UI.
-- Wallet integration for `submit_score`.
-- On-chain program update of best score.
-- Leaderboard API/client sort path.
+- Wallet integration for policy creation.
+- On-chain `PurchasePolicy` account.
+- Agent-triggered `execute_purchase` flow.
+- On-chain `PurchaseReceipt` account.
+- Policy status UI and receipt viewer.
 
 ## 8) Assumptions and constraints
-- Client-generated scores are trusted in MVP.
-- Global leaderboard integrity is on-chain.
-- Gameplay integrity is not fully enforced yet.
-- Blockchain is publication/source-of-truth layer, not full game execution layer.
+- MVP may use a controlled merchant demo, mocked drop page, or ticketing-style checkout simulator.
+- Solana is the authorization/payment/audit layer, not the full commerce backend.
+- The delegated agent is trusted to follow the program and off-chain integration rules, but its authority is bounded by on-chain policy state.
+- Policy evaluation should remain understandable to non-expert judges.
 
 ## 9) Risks and tradeoffs
-- **Simple MVP vs strong anti-cheat:** chose MVP simplicity now.
-- **On-chain permanence vs storage cost:** store best-score only.
-- **Transparency vs cost:** avoid per-action logs in MVP.
-- **Client simplicity vs cryptographic assurance:** roadmap handles stronger verification later.
+- **Fast hackathon scope vs broad merchant coverage:** choose one demo integration or mock merchant.
+- **Delegation convenience vs wallet safety:** choose explicit caps and expiry windows.
+- **On-chain transparency vs external order ambiguity:** store policy and receipt references, not full merchant internals.
+- **Safe positioning vs flashy “sniping” language:** choose user-authorized checkout framing.
 
 ## 10) Success criteria
-- Demonstrable paid global submissions on Devnet.
-- Top-N leaderboard reproducible from on-chain state.
-- End-to-end demo flow understandable in <3 minutes.
+- Demonstrable end-to-end policy creation on Devnet.
+- Agent-triggered execution constrained by policy parameters.
+- On-chain receipt proving what was authorized and what was executed.
+- Demo understandable in <3 minutes.
 
-## 11) Future anti-cheat direction (non-MVP)
-- Session/channel start + session ID.
-- Hash-linked action transcript.
-- Optional attestation/proof adapters.
-- Verified-run badge tier for stronger trust classes.
+## 11) Future direction (non-MVP)
+- Merchant integrations and webhooks.
+- Partial fills / retries.
+- Refund handling.
+- Delegated session keys.
+- Trusted merchant attestations and richer receipts.

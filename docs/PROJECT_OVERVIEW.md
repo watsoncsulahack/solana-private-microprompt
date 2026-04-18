@@ -1,40 +1,43 @@
 # Project Overview
 
 ## Working title
-Solana Paid Leaderboard (Dream Sheep Jump)
+Solana Delegated Checkout Agent
 
 ## Product shape
-- **Local leaderboard (free):** instant local storage and display.
-- **Global leaderboard (paid):** score publication requires fee and on-chain update.
+- **Policy creation (user-controlled):** user defines exact purchase rules.
+- **Delegated execution (agent-controlled):** agent may execute checkout only within those rules.
+- **Receipt layer (on-chain):** policy state and execution receipts are auditable.
 
 ## MVP statement (explicit)
-MVP is a **paid publication layer** for scores, not a full anti-cheat system.
+MVP is a **bounded delegated purchase authorization layer** for time-sensitive purchases, not a universal commerce bot and not an anti-bot bypass system.
 
 ### MVP includes
-1. Local game session + local score handling.
-2. Wallet-connected `submit_score` transaction.
-3. Fee transfer + score update behavior.
-4. On-chain `PlayerScore`-style state for best score per player.
-5. Global leaderboard derived from chain state.
+1. Wallet-connected policy creation.
+2. Constrained spend rules for a time-sensitive purchase.
+3. Agent-triggered execution flow within those rules.
+4. On-chain policy state and purchase receipt state.
+5. Basic status UI for active, executed, expired, and cancelled policies.
 
 ### MVP excludes
-1. Verified game binary attestation.
-2. Cryptographically linked per-action session logs on-chain.
-3. Replay-based score adjudication.
-4. zk/zkVM proof validation for score correctness.
+1. Bypassing merchant anti-bot systems.
+2. Unbounded delegated wallet spending.
+3. Guaranteed successful checkout at external merchants.
+4. Mainnet launch.
+5. Universal merchant integrations.
 
-## Why best-score-per-player
-- Reduces account growth and rent exposure.
-- Simplifies leaderboard query and sorting.
-- Fits hackathon constraints while still proving on-chain integrity.
+## Why bounded delegation matters
+- Users want automation without surrendering full wallet control.
+- Time-sensitive purchases fail when checkout is too slow, not always because the user lacks intent or funds.
+- Explicit caps improve safety and explainability for judges and users.
 
-## Why no per-action on-chain logging in MVP
-- Too expensive/noisy for high-frequency game actions.
-- Introduces major complexity and UX latency.
-- Not required to demonstrate paid global publication + chain source-of-truth.
+## Why no “drop sniper” framing
+- The project is about **authorized assisted checkout**, not unfair market capture.
+- The system should work through approved flows, mock merchants, event registration, or controlled demos.
+- Long-term merchant cooperation is more valuable than adversarial automation.
 
 ## Roadmap direction
-- Session/channel ID per run.
-- Optional pre-session integrity assertion/attestation.
-- Hash-linked action records and transcript commitments.
-- Optional verification layer and verified-run badges.
+- Merchant-specific adapters.
+- Better order-status reconciliation.
+- Budget vaults / refunds.
+- Delegated session keys or scoped execution authorities.
+- Optional attestations and stronger audit trails for agent actions.

@@ -1,53 +1,54 @@
-# Future Anti-Cheat Architecture (Roadmap, Non-MVP)
+# Future Delegated-Checkout Roadmap (Roadmap, Non-MVP)
 
 > This section is conceptual architecture only. It is intentionally out of current MVP scope.
 
 ## 1) Goals
-Increase confidence that a published score came from a valid game run.
+Increase confidence that delegated purchases are executed safely, transparently, and with better merchant interoperability.
 
-## 2) Session/channel model
-Each run is represented by a unique `session_id`.
+## 2) Agent session model
+Each delegated purchase attempt can be represented by a unique `execution_session_id`.
 
 Potential lifecycle:
-1. `start_session(session_id, player, game_id, metadata_commitment)`
-2. local gameplay emits ordered action records
-3. action transcript commitment is sealed
-4. score submission references session commitment
-5. optional verifier classifies run as verified/unverified
+1. `start_execution_session(policy_id, agent_ref, metadata_commitment)`
+2. agent watches availability and prepares checkout
+3. agent attempts execution within policy bounds
+4. purchase outcome is reconciled with merchant/demo service
+5. optional attestation or webhook evidence is attached to receipt
 
-## 3) Pre-session integrity idea
-Before gameplay starts, future versions may include integrity evidence (for example attestation metadata), enabling stronger confidence in untampered client/runtime context.
+## 3) Pre-execution integrity idea
+Before execution starts, future versions may include stronger agent identity or attestation metadata, enabling more confidence in which automation stack acted under the policy.
 
-## 4) Action transcript concept
+## 4) Action/audit transcript concept
 Each record can include:
-- `session_id`
+- `execution_session_id`
 - monotonic counter
-- logical/game timestamp
-- action payload hash
+- logical timestamp
+- request/response metadata hash
 - previous record hash
 - record hash
 
-This creates a hash-linked transcript chain suitable for replay/audit pipelines.
+This creates a hash-linked transcript suitable for audit pipelines.
 
 ## 5) Commitment layer
-Instead of storing all actions on-chain:
+Instead of storing every integration event on-chain:
 - maintain transcript off-chain,
 - store periodic or final commitment root on-chain,
 - verify transcript consistency against root when needed.
 
 ## 6) Verification tiers
-- **Tier 0 (MVP):** no run-proof verification.
-- **Tier 1:** session commitment checks and consistency rules.
-- **Tier 2:** replay/audit validator for suspicious runs.
-- **Tier 3:** optional zk/zkVM proof-backed verification and badge issuance.
+- **Tier 0 (MVP):** bounded on-chain policy + receipt only.
+- **Tier 1:** execution session metadata and consistency checks.
+- **Tier 2:** merchant reconciliation or signed callback verification.
+- **Tier 3:** optional attested agent execution / richer proofs.
 
-## 7) Verified badge concept
-Future leaderboard entries can include trust classes:
-- `published` (MVP default)
-- `verified_session` (commitment checks passed)
-- `proof_verified` (advanced verifier/proof passed)
+## 7) Future trust classes
+Future receipts can include trust classes:
+- `policy_recorded` (MVP default)
+- `session_recorded` (execution metadata captured)
+- `merchant_reconciled` (merchant callback confirmed)
+- `attested_execution` (advanced attestation passed)
 
 ## 8) Why this is deferred
-- Significant complexity and cost.
-- Requires dedicated correctness models for game rules.
-- Not required for demonstrating paid on-chain publication integrity in MVP.
+- Significant complexity and integration work.
+- Merchant-specific requirements vary widely.
+- Not required for demonstrating bounded delegated payment authorization in MVP.
