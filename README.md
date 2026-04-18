@@ -1,22 +1,39 @@
-# Solana Private MicroPrompt
+# Solana Paid Leaderboard (Dream Sheep Jump)
 
-Pay-per-prompt local AI inference on a mobile device.
+Pay-to-submit global scores on Solana devnet, with local free leaderboard + on-chain global replayability.
 
 ## Concept
-Users submit prompts and pay a micro-transaction on Solana devnet. After payment verification, a local on-device model processes the prompt and returns a response.
+- **Local leaderboard**: free, stored locally on device/browser.
+- **Global leaderboard**: score submission requires a micro payment, then score is recorded on-chain.
+- **Reconstructability**: global top scores can be rebuilt from chain data only.
+- **Anti-cheat direction (v2)**: session commitments + optional ZK proof flow inspired by projects like ZK Battleships.
 
-## Core Value
-- **Privacy-first**: no cloud inference required.
-- **Micropayments**: per-prompt pricing on Solana.
-- **Agent-ready**: compatible with autonomous agent workflows.
+## Why this direction
+- Feasible for mobile-hosted hackathon demo by Monday.
+- Reuses existing local tooling and web stack.
+- Strong monetization and verification narrative.
 
-## Scope (Hackathon MVP)
+## What is Anchor?
+Anchor is a Rust framework for Solana programs (smart contracts). It provides:
+- account validation via `#[derive(Accounts)]`
+- IDL generation for clients
+- cleaner instruction handlers
+- easier testing/deployment for Solana apps
+
+In this project, Anchor is the recommended way to build the on-chain score program.
+
+## MVP Scope
 - Devnet only.
-- Single model host (phone/device) online during demo.
-- Payment gate + inference API + lightweight web UI.
-- Basic observability and anti-abuse controls.
+- Dream Sheep Jump as reference game.
+- On-chain score submission for global board.
+- Payment gate enforced by program instruction.
+- Local leaderboard in browser storage.
 
-## Documentation
-- Product Requirements: `docs/PRD.md`
-- Software Requirements: `docs/SRD.md`
-- UML / architecture diagrams: `docs/diagrams/*.md`
+## Docs
+- `docs/PROJECT_OVERVIEW.md`
+- `docs/PRD.md`
+- `docs/SRD.md`
+- `docs/diagrams/use-case.md`
+- `docs/diagrams/dataflow.md`
+- `docs/diagrams/class-diagram.md`
+- `docs/REFERENCES.md`

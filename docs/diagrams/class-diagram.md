@@ -2,52 +2,55 @@
 
 ```mermaid
 classDiagram
-  class UserSession {
-    +walletAddress: string
+  class GameSession {
     +sessionId: string
-    +connectedAt: datetime
+    +playerPubkey: string
+    +gameId: string
+    +startedAt: datetime
+    +endedAt: datetime
+    +localScore: int
   }
 
-  class QuoteService {
-    +getQuote(modelId, promptSize) Quote
+  class LocalLeaderboardStore {
+    +save(score)
+    +listTop(limit)
+    +clear()
   }
 
-  class PaymentVerifier {
-    +verifyTx(signature, expectedAmount, recipient) VerificationResult
-    +issueEntitlement(walletAddress, txSig) Entitlement
+  class GlobalScoreProgramClient {
+    +submitScore(gameId, score, paymentLamports)
+    +deriveScorePda(player, nonce)
   }
 
-  class Entitlement {
-    +token: string
-    +walletAddress: string
-    +txSignature: string
-    +expiresAt: datetime
-    +used: bool
+  class ScoreSubmissionAccount {
+    +gameId: string
+    +player: pubkey
+    +score: int
+    +playedAt: i64
+    +submittedAt: i64
+    +paymentLamports: u64
+    +sessionCommitment: bytes32
   }
 
-  class InferenceOrchestrator {
-    +submitPrompt(entitlementToken, prompt) RequestId
-    +getStatus(requestId) RequestStatus
+  class LeaderboardIndexer {
+    +fetchScoreAccounts(gameId)
+    +rank(scores)
   }
 
-  class LocalRuntimeClient {
-    +infer(prompt) InferenceResult
-    +health() HealthStatus
+  class LeaderboardAPI {
+    +getGlobalTop(gameId, limit)
   }
 
-  class RequestRecord {
-    +requestId: string
-    +walletAddress: string
-    +txSignature: string
-    +state: string
-    +createdAt: datetime
-    +completedAt: datetime
+  class AntiCheatService {
+    +computeSessionCommitment(events)
+    +verifyConstraintSet(proof)
   }
 
-  UserSession --> QuoteService
-  UserSession --> PaymentVerifier
-  PaymentVerifier --> Entitlement
-  InferenceOrchestrator --> PaymentVerifier
-  InferenceOrchestrator --> LocalRuntimeClient
-  InferenceOrchestrator --> RequestRecord
+  GameSession --> LocalLeaderboardStore
+  GameSession --> GlobalScoreProgramClient
+  GlobalScoreProgramClient --> ScoreSubmissionAccount
+  LeaderboardIndexer --> ScoreSubmissionAccount
+  LeaderboardAPI --> LeaderboardIndexer
+  GameSession ..> AntiCheatService : future
+  GlobalScoreProgramClient ..> AntiCheatService : future
 ```
