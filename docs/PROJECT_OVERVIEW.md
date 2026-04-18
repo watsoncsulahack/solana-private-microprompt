@@ -4,35 +4,45 @@
 Solana Paid Leaderboard (Dream Sheep Jump)
 
 ## One-liner
-A game leaderboard where local scores are free, but global score submissions require a Solana devnet micro-payment and are stored on-chain.
+A two-tier leaderboard: local scores are free, while global scores require Solana payment and are persisted on-chain.
 
-## Core Product Shape
-1. Play game locally.
-2. Save free local score.
-3. Pay micro-fee to submit to global board.
-4. Write score record on-chain.
-5. Rebuild global top rankings from chain data.
+## Scope Boundary (critical)
 
-## Why this is strong for hackathon
-- Clear user value and clear business model.
-- Easy to demo in <3 minutes.
-- Verifiable by tx signatures and explorer links.
-- Expandable to anti-cheat research direction.
+### MVP includes
+- Local score tracking and local leaderboard.
+- Wallet flow for paid global submission.
+- On-chain best-score-per-player storage.
+- Leaderboard reconstruction from chain records.
 
-## Anti-cheat roadmap
-### MVP (now)
-- Basic sanity checks only (bounds, timestamp windows).
+### MVP excludes
+- Full anti-cheat proof of score validity.
+- Session transcript verification.
+- zk/zkVM score proofs.
+- Binary attestation.
 
-### V1.5
-- Session start commitment on-chain.
-- Submit score with signed session evidence.
+## Core assumptions
+- Devnet only for hackathon phase.
+- Client score input is accepted with basic sanity checks.
+- Payment and publication integrity are the trust anchors in MVP.
 
-### V2 (research)
-- ZK proof of valid run constraints (inspiration: ZK Battleships-style proof framing).
+## Why this is presentation-ready
+- It demonstrates monetization + verifiability.
+- It has clear architecture evolution paths.
+- It avoids overclaiming anti-cheat in MVP.
 
-## Deliverables for submission
-- On-chain score program (Anchor)
-- Web client with wallet + submit flow
-- Local leaderboard + global leaderboard views
-- Indexer/API to read global leaderboard from chain
-- Demo script + architecture docs
+## Architecture evolution model
+
+### Phase 0 (MVP)
+Paid score publication + chain-sourced leaderboard.
+
+### Phase 1 (near-term)
+Session start marker + stronger submission constraints.
+
+### Phase 2 (research)
+Session/channel cryptographic transcript and optional proof verification.
+
+## Deliverables for hackathon submission
+1. On-chain score program (Anchor)
+2. Frontend game + wallet submit flow
+3. Global leaderboard view sourced from chain
+4. Documentation package (requirements + diagrams + roadmap)

@@ -5,19 +5,21 @@ flowchart TD
   A[Dream Sheep Jump Client] -->|Local score event| B[Local Storage]
   A -->|Connect + sign tx| C[Wallet]
   C -->|submit_score tx| D[Anchor Program]
-  D -->|write ScoreSubmission account| E[Solana Devnet]
+  D -->|write/update PlayerBestScore PDA| E[Solana Devnet]
 
-  F[Indexer/API] -->|scan accounts| E
+  F[Indexer/API] -->|scan best-score accounts| E
   F -->|top-N leaderboard| A
 
-  subgraph Future Anti-Cheat Path
-    G[Session Start Commitment]
-    H[Run Evidence / Proof]
-    I[Optional ZK Verifier]
+  subgraph Future Anti-Cheat Channel (Non-MVP)
+    G[start_session]
+    H[Action Transcript Hash Chain]
+    I[Session Commitment Root]
+    J[Optional Verifier (zk/zkVM)]
   end
 
-  A -.future.-> G
-  A -.future.-> H
-  H -.future.-> I
-  I -.future.-> D
+  A -. roadmap .-> G
+  A -. roadmap .-> H
+  H -. roadmap .-> I
+  I -. roadmap .-> J
+  J -. roadmap .-> D
 ```

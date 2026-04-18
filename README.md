@@ -1,39 +1,68 @@
 # Solana Paid Leaderboard (Dream Sheep Jump)
 
-Pay-to-submit global scores on Solana devnet, with local free leaderboard + on-chain global replayability.
+A mobile-friendly Solana game architecture where:
+- **Local leaderboard is free** (local storage), and
+- **Global leaderboard is paid + on-chain** (Devnet for MVP).
 
-## Concept
-- **Local leaderboard**: free, stored locally on device/browser.
-- **Global leaderboard**: score submission requires a micro payment, then score is recorded on-chain.
-- **Reconstructability**: global top scores can be rebuilt from chain data only.
-- **Anti-cheat direction (v2)**: session commitments + optional ZK proof flow inspired by projects like ZK Battleships.
+The chain is the global source of truth for published scores.
 
-## Why this direction
-- Feasible for mobile-hosted hackathon demo by Monday.
-- Reuses existing local tooling and web stack.
-- Strong monetization and verification narrative.
+---
+
+## Project Status
+
+### MVP (current direction)
+- Dream Sheep Jump gameplay remains client-side.
+- Local score save is free and immediate.
+- Global score submission requires a micro-payment and on-chain write.
+- Best-score-per-player pattern is used on-chain.
+- Frontend/API reconstructs global ranking from on-chain data.
+
+### Not in MVP
+- Full anti-cheat.
+- Zero-knowledge score correctness proofs.
+- Per-action on-chain logging.
+- Remote attestation of game binary integrity.
+
+### Future direction (research/roadmap)
+- Session/channel model with cryptographic linking.
+- Optional tamper attestation.
+- Hash-linked action transcript (or commitment tree).
+- Verified-run badges and optional zk/zkVM validation paths.
+
+---
+
+## Why this architecture
+1. **Hackathon-feasible**: scope fits a Monday submission timeline.
+2. **Strong demo narrative**: pay-to-publish + verifiable on-chain leaderboard.
+3. **Upgradeable**: anti-cheat can evolve without breaking MVP contract surface.
+
+---
 
 ## What is Anchor?
 Anchor is a Rust framework for Solana programs (smart contracts). It provides:
 - account validation via `#[derive(Accounts)]`
 - IDL generation for clients
-- cleaner instruction handlers
-- easier testing/deployment for Solana apps
+- cleaner instruction handlers and typed account models
+- faster test/deploy workflow
 
-In this project, Anchor is the recommended way to build the on-chain score program.
+Anchor is the recommended stack for this project’s on-chain score program.
 
-## MVP Scope
-- Devnet only.
-- Dream Sheep Jump as reference game.
-- On-chain score submission for global board.
-- Payment gate enforced by program instruction.
-- Local leaderboard in browser storage.
+---
 
-## Docs
-- `docs/PROJECT_OVERVIEW.md`
-- `docs/PRD.md`
-- `docs/SRD.md`
-- `docs/diagrams/use-case.md`
-- `docs/diagrams/dataflow.md`
-- `docs/diagrams/class-diagram.md`
-- `docs/REFERENCES.md`
+## Documentation Map
+- `docs/PROJECT_OVERVIEW.md` — high-level concept and boundaries
+- `docs/PRD.md` — product requirements
+- `docs/SRD.md` — software requirements and interfaces
+- `docs/ARCHITECTURE.md` — end-to-end system design + rationale
+- `docs/ANTI_CHEAT_ROADMAP.md` — session/channel cryptographic roadmap
+- `docs/diagrams/use-case.md` — use-case diagram (MVP + future lane)
+- `docs/diagrams/dataflow.md` — dataflow (MVP and future anti-cheat path)
+- `docs/diagrams/class-diagram.md` — initial class model
+- `docs/REFERENCES.md` — references and inspiration
+
+---
+
+## Principles
+- Keep MVP simple and demonstrable.
+- Keep on-chain truth minimal and explicit.
+- Keep future cryptographic claims clearly labeled as roadmap.

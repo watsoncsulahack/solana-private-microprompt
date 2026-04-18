@@ -1,53 +1,62 @@
 # Product Requirements Document (PRD)
 
 ## 1. Problem
-Arcade-style games need globally trusted scoreboards. Pure client-side leaderboards are easy to spoof, and centralized DB-only boards are opaque.
+Game leaderboards are either:
+- easy to spoof (client-only), or
+- opaque and centralized (server DB only).
+
+We need a leaderboard that is globally verifiable, while keeping gameplay fast and local.
 
 ## 2. Product Vision
-A two-tier leaderboard:
-- **Local (free)** for instant user feedback.
-- **Global (paid + on-chain)** for verifiable, monetized competitive ranking.
+A paid global leaderboard where publication requires Solana micro-payment and score records are written on-chain.
 
 ## 3. Goals (MVP)
-1. Enforce a micro-payment before global score submission.
-2. Persist global score records on Solana devnet.
-3. Reconstruct top scores from on-chain data only.
-4. Keep local leaderboard fully usable without wallet/payment.
+1. Enable free local play and local ranking.
+2. Require payment for global score publication.
+3. Persist global score records on-chain.
+4. Rebuild top rankings using on-chain data only.
 
 ## 4. Non-Goals (MVP)
-- Full anti-cheat cryptographic guarantees.
-- Mainnet deployment.
-- Multi-game economy.
-- Tournament matchmaking.
+- Definitive anti-cheat prevention.
+- zk proof correctness for each run.
+- Full game-event transcript verification.
+- Mainnet economic tuning.
 
 ## 5. Personas
-- **Player**: wants fast local play and optional global competition.
-- **Competitive player**: pays for globally visible ranking.
-- **Judge**: needs clear proof that global board entries are paid and on-chain.
+- **Casual player**: wants quick local progression.
+- **Competitive player**: wants globally visible ranked score.
+- **Judge/reviewer**: wants clear verifiable flow and technical honesty.
 
-## 6. User Stories
-- As a player, I can save local scores for free.
-- As a player, I can connect wallet and pay to submit a global score.
-- As a player, I can view global top scores derived from chain data.
-- As an operator, I can verify each global score with tx signatures.
+## 6. Key User Stories
+- As a player, I can play and save local scores with no wallet.
+- As a player, I can connect wallet and pay to submit global score.
+- As a player, I can view global top scores sourced from chain data.
+- As a judge, I can verify submission tx and ranking derivation path.
 
-## 7. MVP Features
-- Wallet connect + devnet flow.
-- Submit score instruction with payment gate.
-- On-chain score accounts.
-- Leaderboard reader/indexer API.
-- Local leaderboard storage and UI.
+## 7. MVP Feature Set
+- Local leaderboard (browser/device storage)
+- Wallet connect (Devnet)
+- Paid global submission transaction
+- On-chain best-score-per-player record
+- Global leaderboard API/UI from chain scans
 
 ## 8. Success Metrics
-- >= 5 successful paid submissions in demo window.
-- Global top 10 reproducible from chain scan.
-- End-to-end submission (wallet->tx->leaderboard) under 60s median.
+- >= 5 successful paid global submissions in demo.
+- Global top 10 reproducible from chain data.
+- End-to-end publish flow median under 60 seconds.
 
-## 9. Risks
-- RPC reliability and latency.
-- Wallet UX friction on mobile.
-- Spoofed client scores in MVP (known limitation).
+## 9. Product Risks
+- RPC instability/rate limits.
+- Mobile wallet friction.
+- Score spoofing (known MVP limitation).
 
-## 10. Anti-cheat Positioning
-- MVP: integrity of payment + recording, not score authenticity.
-- Future: session commitments + optional ZK proof-based validation.
+## 10. Mitigations
+- Show explicit “MVP trust model” in UI/docs.
+- Basic score sanity constraints in program/client.
+- Reserve account fields for future anti-cheat commitments.
+
+## 11. Future Product Direction (non-MVP)
+- Session/channel model per run.
+- Binary attestation hooks.
+- Cryptographically linked action transcripts.
+- Verified-run badge tier with stronger proof requirements.

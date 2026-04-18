@@ -3,11 +3,13 @@
 ## Solana / Anchor
 - Anchor framework docs: https://www.anchor-lang.com/
 - Solana docs: https://solana.com/docs
+- PDA concept: https://solana.com/docs/core/pda
 
-## Inspiration / Related Work
+## Game + ZK / Anti-Cheat Inspiration
 - ZK Battleships Solana (hackathon ecosystem reference)
-- Blackpool (ZKP-enabled trading project reference)
-- ZKSwap (hackathon ecosystem reference)
+- Blackpool (ZKP-enabled darkpool reference in hackathon winner ecosystem)
+- ZKSwap (hackathon winner ecosystem reference)
 
-## Notes
-This project does **not** claim full anti-cheat proof in MVP. It introduces an anti-cheat roadmap with session commitments and optional ZK verification in later phases.
+## Notes on interpretation
+- These references are inspiration, not direct implementation claims.
+- MVP in this repo is intentionally simpler than proof-based anti-cheat systems.

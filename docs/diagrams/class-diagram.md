@@ -17,23 +17,22 @@ classDiagram
     +clear()
   }
 
-  class GlobalScoreProgramClient {
-    +submitScore(gameId, score, paymentLamports)
-    +deriveScorePda(player, nonce)
+  class WalletSubmissionClient {
+    +submitScoreTx(gameId, score, lamports)
   }
 
-  class ScoreSubmissionAccount {
+  class PlayerBestScoreAccount {
     +gameId: string
     +player: pubkey
-    +score: int
-    +playedAt: i64
-    +submittedAt: i64
-    +paymentLamports: u64
+    +bestScore: int
+    +bestScoreSubmittedAt: i64
+    +totalPaidLamports: u64
+    +submitCount: u32
     +sessionCommitment: bytes32
   }
 
   class LeaderboardIndexer {
-    +fetchScoreAccounts(gameId)
+    +fetchBestScores(gameId)
     +rank(scores)
   }
 
@@ -41,16 +40,22 @@ classDiagram
     +getGlobalTop(gameId, limit)
   }
 
-  class AntiCheatService {
-    +computeSessionCommitment(events)
-    +verifyConstraintSet(proof)
+  class SessionTranscriptService {
+    +appendAction(sessionId, action)
+    +computeCommitment(sessionId)
+  }
+
+  class OptionalProofVerifier {
+    +verify(proof, publicInputs)
   }
 
   GameSession --> LocalLeaderboardStore
-  GameSession --> GlobalScoreProgramClient
-  GlobalScoreProgramClient --> ScoreSubmissionAccount
-  LeaderboardIndexer --> ScoreSubmissionAccount
+  GameSession --> WalletSubmissionClient
+  WalletSubmissionClient --> PlayerBestScoreAccount
+  LeaderboardIndexer --> PlayerBestScoreAccount
   LeaderboardAPI --> LeaderboardIndexer
-  GameSession ..> AntiCheatService : future
-  GlobalScoreProgramClient ..> AntiCheatService : future
+
+  GameSession ..> SessionTranscriptService : roadmap
+  WalletSubmissionClient ..> SessionTranscriptService : roadmap
+  SessionTranscriptService ..> OptionalProofVerifier : roadmap
 ```

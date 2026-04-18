@@ -1,58 +1,74 @@
 # Software Requirements Document (SRD)
 
-## 1. Architecture Components
-1. **Game Client (Web/Mobile Web)**
-   - Runs Dream Sheep Jump UI.
-   - Manages local score storage.
-2. **Wallet + Payment UI**
-   - Signs and sends devnet payment/submission tx.
-3. **On-chain Program (Anchor)**
-   - Validates payment rule.
-   - Stores global score record account.
-4. **Leaderboard Indexer/API**
-   - Reads score accounts from chain.
-   - Returns sorted top-N responses.
-5. **Local Store**
-   - Browser localStorage for local leaderboard.
+## 1. System Context
+This project combines client-side gameplay with on-chain publication:
+- gameplay state is local,
+- publication state is on-chain.
 
-## 2. Core Data Model (On-chain)
-### ScoreSubmission Account
+## 2. Technology Choices
+- **Chain**: Solana Devnet
+- **Program framework**: Anchor (Rust)
+- **Client**: web/mobile-web game UI
+- **Leaderboard read path**: chain scan via indexer/API
+
+## 3. On-chain Data Model (MVP)
+
+### Account: `PlayerBestScore`
+Recommended PDA seeds:
+- `b"best_score"`
+- `game_id`
+- `player_pubkey`
+
+Fields:
 - `game_id: String`
 - `player: Pubkey`
-- `score: u32`
-- `played_at: i64`
-- `submitted_at: i64`
-- `payment_lamports: u64`
-- `tx_sig_ref: String` (optional helper metadata)
-- `session_commitment: [u8;32]` (reserved for anti-cheat roadmap)
+- `best_score: u32`
+- `best_score_submitted_at: i64`
+- `total_paid_lamports: u64`
+- `submit_count: u32`
+- `last_tx_ref: [u8; 64]` (or signature string)
+- `session_commitment: [u8; 32]` (reserved; optional in MVP)
 
-## 3. Functional Requirements
-- FR1: Local score save must not require wallet.
-- FR2: Global score submit must require payment rule enforcement.
-- FR3: Program must reject invalid/underpaid submissions.
-- FR4: API must reconstruct leaderboard from on-chain records.
-- FR5: UI must clearly distinguish local vs global leaderboard.
+## 4. Instruction Contract (MVP)
 
-## 4. Non-Functional Requirements
-- NFR1: Devnet-compatible and mobile-browser-friendly.
-- NFR2: API should return top-100 in <2s (cache allowed).
-- NFR3: Deterministic sorting: score desc, then earliest submit.
-- NFR4: No private prompt/PII handling required in this project.
+### `submit_score(game_id, score)`
+Atomic behavior:
+1. Validate signer and account constraints.
+2. Validate payment transfer rule to treasury (in same transaction/ix flow).
+3. Create/update `PlayerBestScore` PDA.
+4. Update `best_score` only if new score is higher.
+5. Increment `submit_count`; track paid totals.
 
-## 5. API Draft
-- `GET /leaderboard/global?gameId=...&limit=...`
-- `GET /leaderboard/local` (client-side)
-- `POST /score/local` (client-side)
+## 5. Functional Requirements
+- FR1: local score save must not touch chain.
+- FR2: global submission requires successful payment check.
+- FR3: global score write must be deterministic and idempotent-safe.
+- FR4: leaderboard API must derive ranking from on-chain records only.
 
-(Program interaction is direct via wallet tx; backend does not own truth.)
+## 6. Non-Functional Requirements
+- NFR1: mobile-friendly latency for submit path.
+- NFR2: deterministic sorting (score desc, then earliest timestamp).
+- NFR3: clear failure diagnostics for wallet/payment/RPC errors.
 
-## 6. Security / Integrity Notes
-- On-chain payment and score record are trust anchors.
-- Client-reported score still spoofable in MVP.
-- Future anti-cheat hooks:
-  - session start tx
-  - signed frame commitments
-  - optional zk proof verification pathway
+## 7. API Surface (supporting services)
+- `GET /leaderboard/global?gameId=&limit=`
+- `GET /leaderboard/global/latest?gameId=`
+- `GET /leaderboard/local` (client-only)
 
-## 7. Anchor usage
-Anchor is used to implement the Solana program with typed accounts and IDL-driven clients, reducing integration complexity and speeding hackathon delivery.
+Note: API is read/index convenience, not source of truth.
+
+## 8. Trust Model (MVP)
+- Trusts client-reported score with basic sanity checks.
+- Trusts chain for payment + publication integrity.
+- Does not prove run legitimacy.
+
+## 9. Future Verification Layer (non-MVP)
+- session/channel start event
+- monotonic action counter and hash-chain links
+- optional commitment tree or transcript root
+- optional proof verifier pathway (zk/zkVM)
+
+## 10. Rationale for Best-Score-per-Player Pattern
+- Lower account growth and easier indexing than per-run accounts.
+- Better user experience for “global best” board.
+- Can be extended later with per-run optional logs if needed.
