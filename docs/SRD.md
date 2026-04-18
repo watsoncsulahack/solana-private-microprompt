@@ -1,74 +1,84 @@
 # Software Requirements Document (SRD)
 
-## 1. System Context
-This project combines client-side gameplay with on-chain publication:
-- gameplay state is local,
-- publication state is on-chain.
+## 1) Stack
+- Solana Devnet
+- Anchor program (Rust)
+- Web/mobile-web game client
+- Optional indexer/API for leaderboard read convenience
 
-## 2. Technology Choices
-- **Chain**: Solana Devnet
-- **Program framework**: Anchor (Rust)
-- **Client**: web/mobile-web game UI
-- **Leaderboard read path**: chain scan via indexer/API
+## 2) Domain model (current)
+- `ConfigState` (program config and fee settings)
+- `PlayerScore` (best score per player per game)
+- Local game session (client-side only)
+- Score submission event (wallet tx)
 
-## 3. On-chain Data Model (MVP)
+## 3) On-chain accounts (MVP)
 
-### Account: `PlayerBestScore`
-Recommended PDA seeds:
-- `b"best_score"`
-- `game_id`
-- `player_pubkey`
+### Config PDA
+Purpose: global configuration for a game/leaderboard program instance.
 
-Fields:
+Suggested fields:
+- `admin: Pubkey`
+- `treasury: Pubkey`
+- `submission_fee_lamports: u64`
+- `game_id: String`
+- `is_paused: bool`
+- `bump: u8`
+
+### PlayerScore PDA
+Purpose: one account per `(game_id, player)` storing best published score.
+
+Suggested fields:
 - `game_id: String`
 - `player: Pubkey`
 - `best_score: u32`
 - `best_score_submitted_at: i64`
-- `total_paid_lamports: u64`
 - `submit_count: u32`
-- `last_tx_ref: [u8; 64]` (or signature string)
-- `session_commitment: [u8; 32]` (reserved; optional in MVP)
+- `total_paid_lamports: u64`
+- `last_submit_sig_ref: [u8; 64]` (optional helper)
+- `session_commitment: [u8; 32]` (reserved for roadmap)
+- `bump: u8`
 
-## 4. Instruction Contract (MVP)
+## 4) Instruction behavior (MVP)
 
-### `submit_score(game_id, score)`
-Atomic behavior:
-1. Validate signer and account constraints.
-2. Validate payment transfer rule to treasury (in same transaction/ix flow).
-3. Create/update `PlayerBestScore` PDA.
-4. Update `best_score` only if new score is higher.
-5. Increment `submit_count`; track paid totals.
+### `submit_score(score: u32, game_id: String)`
+Required behavior:
+1. Read/validate Config PDA.
+2. Enforce pause rules and score sanity bounds.
+3. Transfer submission fee to treasury in the same transaction flow.
+4. Create/update PlayerScore PDA.
+5. If `score > best_score`, overwrite best-score fields.
+6. If score is non-improving, preserve best score but still record attempt/payment metrics as designed.
 
-## 5. Functional Requirements
-- FR1: local score save must not touch chain.
-- FR2: global submission requires successful payment check.
-- FR3: global score write must be deterministic and idempotent-safe.
-- FR4: leaderboard API must derive ranking from on-chain records only.
+### `update_config(...)` (admin, optional but recommended)
+- Update fee, treasury, pause flag, etc.
+- Admin-only.
 
-## 6. Non-Functional Requirements
-- NFR1: mobile-friendly latency for submit path.
-- NFR2: deterministic sorting (score desc, then earliest timestamp).
-- NFR3: clear failure diagnostics for wallet/payment/RPC errors.
+## 5) Why atomic flow matters
+Fee transfer and score update should be part of one coherent transaction path to avoid:
+- paid but unpublished submissions,
+- unpublished fee ambiguity,
+- inconsistent leaderboard state.
 
-## 7. API Surface (supporting services)
-- `GET /leaderboard/global?gameId=&limit=`
-- `GET /leaderboard/global/latest?gameId=`
-- `GET /leaderboard/local` (client-only)
+## 6) Leaderboard query model
+Global leaderboard read path:
+1. Fetch all `PlayerScore` PDAs for `game_id`.
+2. Sort by:
+   - `best_score` descending,
+   - `best_score_submitted_at` ascending,
+   - `player` lexicographic as deterministic tie-break.
+3. Return top-N.
 
-Note: API is read/index convenience, not source of truth.
+## 7) Client publication semantics
+- Local scores are marked unpublished until a successful on-chain submit is confirmed.
+- Published status is tied to tx confirmation + updated PlayerScore readback.
 
-## 8. Trust Model (MVP)
-- Trusts client-reported score with basic sanity checks.
-- Trusts chain for payment + publication integrity.
-- Does not prove run legitimacy.
+## 8) Non-functional notes
+- Devnet latency/resilience constraints are expected.
+- Keep transaction count low (best-score model).
+- Avoid large account growth in MVP.
 
-## 9. Future Verification Layer (non-MVP)
-- session/channel start event
-- monotonic action counter and hash-chain links
-- optional commitment tree or transcript root
-- optional proof verifier pathway (zk/zkVM)
-
-## 10. Rationale for Best-Score-per-Player Pattern
-- Lower account growth and easier indexing than per-run accounts.
-- Better user experience for “global best” board.
-- Can be extended later with per-run optional logs if needed.
+## 9) Roadmap hooks (non-MVP)
+- `session_commitment` field reserved for transcript root.
+- Future instructions: `start_session`, `close_session`, `submit_transcript_commitment`.
+- Future verifier adapter for proof-backed run classification.

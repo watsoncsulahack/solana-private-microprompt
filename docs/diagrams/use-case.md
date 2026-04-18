@@ -3,34 +3,35 @@
 ```mermaid
 flowchart LR
   Player((Player))
+  Admin((Admin))
   Wallet((Wallet))
   Chain((Solana Devnet))
   API((Leaderboard API))
 
   subgraph MVP[Current MVP]
-    UC1([Play Game])
-    UC2([Save Local Score - Free])
-    UC3([Connect Wallet])
-    UC4([Pay + Submit Global Score])
-    UC5([Program Validates Payment])
-    UC6([Update Best Score PDA])
-    UC7([View Global Leaderboard])
+    U1([Play game locally])
+    U2([Save local score for free])
+    U3([Connect wallet])
+    U4([Submit best score])
+    U5([Pay submission fee])
+    U6([Reject non-improving score update])
+    U7([View global leaderboard])
+    U8([Update config state])
   end
 
-  subgraph FUTURE[Future Verification Layer - Non-MVP]
-    UC8([Start Session Channel])
-    UC9([Generate Hash-linked Action Transcript])
-    UC10([Submit Session Commitment])
-    UC11([Optional Proof Verification])
-    UC12([Verified-Run Badge])
+  subgraph FUTURE[Future / Non-MVP]
+    F1([Start verified session])
+    F2([Export session transcript])
+    F3([Submit run for verification])
+    F4([View verified badge])
   end
 
-  Player --> UC1 --> UC2
-  Player --> UC3 --> Wallet
-  Player --> UC4 --> Wallet --> Chain
-  UC4 --> UC5 --> UC6 --> Chain
-  Player --> UC7 --> API --> Chain
+  Player --> U1 --> U2
+  Player --> U3 --> Wallet
+  Player --> U4 --> U5 --> Wallet --> Chain
+  U4 --> U6
+  Player --> U7 --> API --> Chain
+  Admin --> U8 --> Chain
 
-  Player -. roadmap .-> UC8 --> UC9 --> UC10
-  UC10 -. roadmap .-> UC11 --> UC12
+  Player -. roadmap .-> F1 --> F2 --> F3 --> F4
 ```

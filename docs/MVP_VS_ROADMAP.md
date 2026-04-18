@@ -1,16 +1,22 @@
-# MVP vs Roadmap Scope Matrix
+# MVP vs Roadmap
 
-| Capability | MVP (Now) | Short-term Next | Long-term Research |
+## Scope split
+
+| Capability | MVP (Implemented Target) | Next Stage | Long-term Research |
 |---|---|---|---|
-| Local leaderboard (free) | ✅ | ✅ | ✅ |
-| Paid global submission | ✅ | ✅ | ✅ |
-| On-chain best score per player | ✅ | ✅ | ✅ |
-| Chain-only global reconstruction | ✅ | ✅ | ✅ |
-| Basic score sanity checks | ✅ | ✅ | ✅ |
-| Session/channel start event | ❌ | 🟡 planned | ✅ |
-| Hash-linked action transcript | ❌ | ❌ | ✅ |
-| Binary attestation integration | ❌ | ❌ | ✅ |
-| zk/zkVM score proof verification | ❌ | ❌ | ✅ |
-| Verified-run badge tier | ❌ | 🟡 planned | ✅ |
+| Local gameplay + local leaderboard | ✅ | ✅ | ✅ |
+| Wallet-connected global submission | ✅ | ✅ | ✅ |
+| Submission fee enforcement | ✅ | ✅ | ✅ |
+| On-chain best-score-per-player | ✅ | ✅ | ✅ |
+| Global board from on-chain state | ✅ | ✅ | ✅ |
+| Admin config updates | ✅ (recommended) | ✅ | ✅ |
+| Session/channel identifier | ❌ | 🟡 | ✅ |
+| Action transcript hash-chain | ❌ | ❌ | ✅ |
+| Replay validation | ❌ | 🟡 | ✅ |
+| zk/zkVM proof verification | ❌ | ❌ | ✅ |
+| Verified-run badge tiers | ❌ | 🟡 | ✅ |
 
-Legend: ✅ implemented / 🟡 planned / ❌ out of scope
+Legend: ✅ current scope / 🟡 planned next / ❌ not in current scope
+
+## Important clarification
+MVP trust is about **publication integrity** (paid, on-chain, queryable), not guaranteed gameplay legitimacy.

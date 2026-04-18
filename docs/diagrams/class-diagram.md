@@ -1,61 +1,102 @@
-# Initial Class Diagram (Mermaid)
+# Class / Domain Model Diagram (Mermaid)
 
 ```mermaid
 classDiagram
   class GameSession {
     +sessionId: string
-    +playerPubkey: string
     +gameId: string
+    +localScore: int
     +startedAt: datetime
     +endedAt: datetime
-    +localScore: int
   }
 
-  class LocalLeaderboardStore {
-    +save(score)
-    +listTop(limit)
-    +clear()
+  class WalletAdapter {
+    +connect()
+    +signAndSend(tx)
   }
 
-  class WalletSubmissionClient {
-    +submitScoreTx(gameId, score, lamports)
+  class ScoreSubmissionService {
+    +submitBestScore(score)
+    +markPublished(txSig)
   }
 
-  class PlayerBestScoreAccount {
-    +gameId: string
+  class LeaderboardService {
+    +fetchGlobalTop(gameId, limit)
+    +fetchLocalTop(limit)
+  }
+
+  class LeaderboardViewModel {
+    +localEntries
+    +globalEntries
+    +unpublishedBestScore
+  }
+
+  class ConfigStatePDA {
+    +admin: pubkey
+    +treasury: pubkey
+    +submissionFeeLamports: u64
+    +isPaused: bool
+  }
+
+  class PlayerScorePDA {
     +player: pubkey
+    +gameId: string
     +bestScore: int
     +bestScoreSubmittedAt: i64
-    +totalPaidLamports: u64
     +submitCount: u32
-    +sessionCommitment: bytes32
   }
 
-  class LeaderboardIndexer {
-    +fetchBestScores(gameId)
-    +rank(scores)
+  class SubmitScoreHandler {
+    +validateConfig()
+    +enforceFeeTransfer()
+    +updateBestScore()
   }
 
-  class LeaderboardAPI {
-    +getGlobalTop(gameId, limit)
+  class UpdateConfigHandler {
+    +setFee()
+    +setPause()
+    +setTreasury()
   }
 
-  class SessionTranscriptService {
-    +appendAction(sessionId, action)
-    +computeCommitment(sessionId)
+  %% Roadmap-only conceptual classes
+  class VerifiedSession {
+    <<roadmap>>
+    +sessionId
+    +integrityMeta
+  }
+  class ActionRecord {
+    <<roadmap>>
+    +counter
+    +prevHash
+    +actionHash
+  }
+  class SessionTranscript {
+    <<roadmap>>
+    +rootHash
+    +records[]
+  }
+  class ReplayVerifier {
+    <<roadmap>>
+    +verifyTranscript()
+  }
+  class ProofAdapter {
+    <<roadmap>>
+    +verifyProof()
   }
 
-  class OptionalProofVerifier {
-    +verify(proof, publicInputs)
-  }
+  GameSession --> ScoreSubmissionService
+  GameSession --> LeaderboardViewModel
+  ScoreSubmissionService --> WalletAdapter
+  ScoreSubmissionService --> SubmitScoreHandler
+  LeaderboardService --> PlayerScorePDA
+  LeaderboardViewModel --> LeaderboardService
+  SubmitScoreHandler --> ConfigStatePDA
+  SubmitScoreHandler --> PlayerScorePDA
+  UpdateConfigHandler --> ConfigStatePDA
 
-  GameSession --> LocalLeaderboardStore
-  GameSession --> WalletSubmissionClient
-  WalletSubmissionClient --> PlayerBestScoreAccount
-  LeaderboardIndexer --> PlayerBestScoreAccount
-  LeaderboardAPI --> LeaderboardIndexer
-
-  GameSession ..> SessionTranscriptService : roadmap
-  WalletSubmissionClient ..> SessionTranscriptService : roadmap
-  SessionTranscriptService ..> OptionalProofVerifier : roadmap
+  GameSession ..> VerifiedSession : roadmap
+  VerifiedSession ..> ActionRecord : roadmap
+  ActionRecord ..> SessionTranscript : roadmap
+  SessionTranscript ..> ReplayVerifier : roadmap
+  ReplayVerifier ..> ProofAdapter : roadmap
 ```

@@ -1,68 +1,45 @@
 # Solana Paid Leaderboard (Dream Sheep Jump)
 
-A mobile-friendly Solana game architecture where:
-- **Local leaderboard is free** (local storage), and
-- **Global leaderboard is paid + on-chain** (Devnet for MVP).
+A leaderboard architecture where local play is free and global publication is paid + on-chain.
 
-The chain is the global source of truth for published scores.
+## 2-minute project summary
+### What the MVP does now
+- Player plays locally and saves local scores for free.
+- Player can submit score to global board by signing a Solana Devnet transaction.
+- Program enforces fee + score update in one flow.
+- Program stores **best score per player** (not every run).
+- Frontend/API reads on-chain accounts and renders global top scores.
 
----
-
-## Project Status
-
-### MVP (current direction)
-- Dream Sheep Jump gameplay remains client-side.
-- Local score save is free and immediate.
-- Global score submission requires a micro-payment and on-chain write.
-- Best-score-per-player pattern is used on-chain.
-- Frontend/API reconstructs global ranking from on-chain data.
-
-### Not in MVP
-- Full anti-cheat.
-- Zero-knowledge score correctness proofs.
+### What MVP intentionally does not do
+- Full anti-cheat or tamper-proof gameplay verification.
 - Per-action on-chain logging.
-- Remote attestation of game binary integrity.
+- zk/zkVM score validity proofs.
+- Binary attestation verification.
 
-### Future direction (research/roadmap)
-- Session/channel model with cryptographic linking.
-- Optional tamper attestation.
-- Hash-linked action transcript (or commitment tree).
-- Verified-run badges and optional zk/zkVM validation paths.
+## Why this MVP shape
+- **Hackathon-feasible** under tight timeline.
+- **On-chain source of truth** for global leaderboard is enough for demo integrity.
+- **Best-score-per-player** keeps storage/rent/indexing manageable.
+- Leaves clean extension points for session verification later.
 
----
+## Why Solana + Anchor
+- Solana gives fast/cheap transaction rails suitable for micro-fee leaderboard submits.
+- Anchor accelerates program development with typed accounts, account constraints, and IDL-driven client integration.
 
-## Why this architecture
-1. **Hackathon-feasible**: scope fits a Monday submission timeline.
-2. **Strong demo narrative**: pay-to-publish + verifiable on-chain leaderboard.
-3. **Upgradeable**: anti-cheat can evolve without breaking MVP contract surface.
+## Documentation map
+- `docs/PROJECT_OVERVIEW.md`
+- `docs/PRD.md`
+- `docs/SRD.md`
+- `docs/ARCHITECTURE.md`
+- `docs/ANTI_CHEAT_ROADMAP.md`
+- `docs/MVP_VS_ROADMAP.md`
+- `docs/GLOSSARY.md`
+- `docs/TRUST_MODEL.md`
+- `docs/ARCHITECTURAL_DECISIONS.md`
+- `docs/IMPLEMENTATION_NOTES.md`
+- `docs/diagrams/` (context, use-case, dataflow, class, sequence, lifecycle)
 
----
-
-## What is Anchor?
-Anchor is a Rust framework for Solana programs (smart contracts). It provides:
-- account validation via `#[derive(Accounts)]`
-- IDL generation for clients
-- cleaner instruction handlers and typed account models
-- faster test/deploy workflow
-
-Anchor is the recommended stack for this project’s on-chain score program.
-
----
-
-## Documentation Map
-- `docs/PROJECT_OVERVIEW.md` — high-level concept and boundaries
-- `docs/PRD.md` — product requirements
-- `docs/SRD.md` — software requirements and interfaces
-- `docs/ARCHITECTURE.md` — end-to-end system design + rationale
-- `docs/ANTI_CHEAT_ROADMAP.md` — session/channel cryptographic roadmap
-- `docs/diagrams/use-case.md` — use-case diagram (MVP + future lane)
-- `docs/diagrams/dataflow.md` — dataflow (MVP and future anti-cheat path)
-- `docs/diagrams/class-diagram.md` — initial class model
-- `docs/REFERENCES.md` — references and inspiration
-
----
-
-## Principles
-- Keep MVP simple and demonstrable.
-- Keep on-chain truth minimal and explicit.
-- Keep future cryptographic claims clearly labeled as roadmap.
+## Design guardrails
+- Don’t overclaim anti-cheat in MVP.
+- Keep current-state and roadmap-state explicitly separated.
+- Keep global board derivable from chain data.

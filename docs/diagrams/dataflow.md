@@ -1,25 +1,28 @@
-# Dataflow Diagram (Mermaid)
+# Data Flow Diagram (Mermaid)
 
 ```mermaid
 flowchart TD
-  A[Dream Sheep Jump Client] -->|Local score event| B[Local Storage]
-  A -->|Connect + sign tx| C[Wallet]
-  C -->|submit_score tx| D[Anchor Program]
-  D -->|write/update PlayerBestScore PDA| E[Solana Devnet]
+  A[Player/Game Client] -->|Play locally| B[Local score]
+  B -->|Save free| C[Local leaderboard store]
 
-  F[Indexer/API] -->|scan best-score accounts| E
-  F -->|top-N leaderboard| A
+  A -->|Connect wallet| D[Wallet Adapter]
+  A -->|Submit score request| D
+  D -->|Signed tx| E[Anchor Program: submit_score]
+  E -->|Read rules| F[(Config PDA)]
+  E -->|Fee transfer to treasury| G[(Treasury)]
+  E -->|Create/update best score| H[(PlayerScore PDA)]
 
-  subgraph Future Anti-Cheat Channel (Non-MVP)
-    G[start_session]
-    H[Action Transcript Hash Chain]
-    I[Session Commitment Root]
-    J[Optional Verifier (zk/zkVM)]
+  I[Leaderboard API/Indexer] -->|Fetch PlayerScore PDAs| H
+  I -->|Sort and return top-N| J[Leaderboard UI]
+
+  subgraph Future verification path (Non-MVP)
+    K[start_session]
+    L[Action records + monotonic counter]
+    M[Hash-linked transcript]
+    N[Transcript commitment]
+    O[Optional verifier/proof adapter]
   end
 
-  A -. roadmap .-> G
-  A -. roadmap .-> H
-  H -. roadmap .-> I
-  I -. roadmap .-> J
-  J -. roadmap .-> D
+  A -. roadmap .-> K -.-> L -.-> M -.-> N -.-> O
+  O -. roadmap .-> E
 ```

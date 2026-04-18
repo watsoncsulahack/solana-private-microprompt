@@ -1,48 +1,40 @@
 # Project Overview
 
-## Working Title
+## Working title
 Solana Paid Leaderboard (Dream Sheep Jump)
 
-## One-liner
-A two-tier leaderboard: local scores are free, while global scores require Solana payment and are persisted on-chain.
+## Product shape
+- **Local leaderboard (free):** instant local storage and display.
+- **Global leaderboard (paid):** score publication requires fee and on-chain update.
 
-## Scope Boundary (critical)
+## MVP statement (explicit)
+MVP is a **paid publication layer** for scores, not a full anti-cheat system.
 
 ### MVP includes
-- Local score tracking and local leaderboard.
-- Wallet flow for paid global submission.
-- On-chain best-score-per-player storage.
-- Leaderboard reconstruction from chain records.
+1. Local game session + local score handling.
+2. Wallet-connected `submit_score` transaction.
+3. Fee transfer + score update behavior.
+4. On-chain `PlayerScore`-style state for best score per player.
+5. Global leaderboard derived from chain state.
 
 ### MVP excludes
-- Full anti-cheat proof of score validity.
-- Session transcript verification.
-- zk/zkVM score proofs.
-- Binary attestation.
+1. Verified game binary attestation.
+2. Cryptographically linked per-action session logs on-chain.
+3. Replay-based score adjudication.
+4. zk/zkVM proof validation for score correctness.
 
-## Core assumptions
-- Devnet only for hackathon phase.
-- Client score input is accepted with basic sanity checks.
-- Payment and publication integrity are the trust anchors in MVP.
+## Why best-score-per-player
+- Reduces account growth and rent exposure.
+- Simplifies leaderboard query and sorting.
+- Fits hackathon constraints while still proving on-chain integrity.
 
-## Why this is presentation-ready
-- It demonstrates monetization + verifiability.
-- It has clear architecture evolution paths.
-- It avoids overclaiming anti-cheat in MVP.
+## Why no per-action on-chain logging in MVP
+- Too expensive/noisy for high-frequency game actions.
+- Introduces major complexity and UX latency.
+- Not required to demonstrate paid global publication + chain source-of-truth.
 
-## Architecture evolution model
-
-### Phase 0 (MVP)
-Paid score publication + chain-sourced leaderboard.
-
-### Phase 1 (near-term)
-Session start marker + stronger submission constraints.
-
-### Phase 2 (research)
-Session/channel cryptographic transcript and optional proof verification.
-
-## Deliverables for hackathon submission
-1. On-chain score program (Anchor)
-2. Frontend game + wallet submit flow
-3. Global leaderboard view sourced from chain
-4. Documentation package (requirements + diagrams + roadmap)
+## Roadmap direction
+- Session/channel ID per run.
+- Optional pre-session integrity assertion/attestation.
+- Hash-linked action records and transcript commitments.
+- Optional verification layer and verified-run badges.

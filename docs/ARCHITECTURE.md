@@ -1,62 +1,65 @@
-# Architecture Deep Dive
+# Architecture
 
-## 1. System Layers
+## 1) System context
+- **Player** interacts with game client.
+- **Wallet** signs score submission transaction.
+- **Anchor program** enforces fee + state update rules.
+- **On-chain PDAs** persist global leaderboard source-of-truth.
+- **Leaderboard UI/API** reads chain state and renders rankings.
 
-### Layer A: Gameplay (Local, Free)
-- Runs game loop and scoring logic locally.
-- Stores local leaderboard in browser/device.
-- No wallet required.
+(See `docs/diagrams/system-context.md`.)
 
-### Layer B: Publication (Paid, On-chain)
-- Wallet signs submit transaction.
-- Program enforces payment + score publication rules.
-- Best score per player persisted on-chain.
+## 2) Architectural rationale
 
-### Layer C: Read Path (Indexed)
-- Indexer/API scans chain accounts.
-- Frontend renders top-N board from chain-derived records.
+### Why Solana for global leaderboard
+- Fast confirmation and low fees fit micro-fee score submissions.
+- Public verifiability of published global state.
+- Easy explorer-based demo proof for judges.
 
-## 2. Key Design Decisions
+### Why Anchor
+- Faster development with typed account constraints.
+- Cleaner account validation and instruction handling.
+- IDL-driven client integration.
 
-### Decision 1: On-chain source of truth for global board
-Reason: enables independent reconstruction and trust-minimized ranking.
+### Why PDAs
+- Deterministic account addresses for per-player score state.
+- No private key required for program-owned account derivation.
+- Natural fit for `(game_id, player)` best-score records.
 
-### Decision 2: Best-score-per-player account model
-Reason: simpler storage/indexing and stronger MVP clarity.
+### Why best-score-only on-chain
+- Lower cost and lower complexity.
+- Enough to prove a ranked global board.
+- Avoids bloating chain with per-action/per-run data in MVP.
 
-### Decision 3: Atomic payment + score submit
-Reason: avoids paid-but-not-published or published-without-payment states.
+## 3) Current trust boundary
+- **Trusted for MVP:** payment/publication integrity and deterministic ranking from on-chain accounts.
+- **Not yet trust-minimized:** game runtime integrity and client score authenticity.
 
-### Decision 4: Anti-cheat as roadmap, not MVP claim
-Reason: realistic delivery scope and technical honesty for hackathon.
+## 4) Current-state flow
+1. Player plays locally.
+2. Local score saved freely.
+3. Player connects wallet and submits global score.
+4. Program validates fee/config and updates PlayerScore PDA.
+5. Leaderboard read path queries chain and renders top-N.
 
-## 3. MVP Transaction Sequence
-1. Player finishes run locally.
-2. Player chooses “Submit Global”.
-3. Wallet signs transaction with payment + submit instruction.
-4. Program validates and updates player best-score account.
-5. API reads chain account updates; frontend leaderboard refreshes.
+(See sequence diagrams in `docs/diagrams/`.)
 
-## 4. Data Integrity Notes
-- Ranking determinism should be fixed in one canonical sort order:
-  1) score descending
-  2) earliest best-score timestamp ascending
-  3) player pubkey ascending (stable tie-break)
+## 5) Why anti-cheat is deferred
+- Full anti-cheat is a separate research-heavy subsystem.
+- Hackathon objective is clear on-chain publication integrity first.
+- We intentionally preserve extensibility points for stronger verification later.
 
-## 5. Failure Modes and Handling
-- Wallet reject: client reports and leaves local score untouched.
-- Underpayment: program reject, no write.
-- RPC timeout: client retry strategy, no local/global divergence in state claims.
-- Duplicate submit: idempotent-safe update logic.
+## 6) Future verification architecture (non-MVP)
+- Session/channel id created at run start.
+- Optional pre-session integrity assertions.
+- Hash-linked action records with monotonic counters.
+- Transcript commitment root attached to submission.
+- Optional replay/proof verifier and verified-run badge classes.
 
-## 6. Security and Abuse (MVP)
-- Payment-gated publication reduces spam.
-- Basic score bounds/sanity checks mitigate trivial abuse.
-- Full score legitimacy not guaranteed (explicitly disclosed).
+Detailed roadmap: `docs/ANTI_CHEAT_ROADMAP.md`.
 
-## 7. Future Cryptographic Verification Layer (non-MVP)
-- Session/channel ID created at run start.
-- Optional binary integrity attestation reference.
-- Action transcript with monotonic counter + hash-linking.
-- Transcript commitment (single root) attached at submit.
-- Optional verifier for advanced proof modes (zk/zkVM) and “verified run” badges.
+## 7) Open implementation gaps (code)
+- Program implementation of Config PDA + PlayerScore PDA.
+- Instruction handlers and account constraints in Anchor.
+- Wallet/submit UX and tx confirmation states.
+- Chain indexer/read adapter and deterministic sort tests.

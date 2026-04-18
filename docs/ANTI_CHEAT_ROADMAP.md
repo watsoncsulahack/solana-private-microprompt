@@ -1,56 +1,53 @@
-# Anti-Cheat Roadmap (Future Architecture)
+# Future Anti-Cheat Architecture (Roadmap, Non-MVP)
 
-> This document is explicitly **non-MVP**.
+> This section is conceptual architecture only. It is intentionally out of current MVP scope.
 
-## 1. Objective
-Improve confidence in score legitimacy beyond payment/publication integrity.
+## 1) Goals
+Increase confidence that a published score came from a valid game run.
 
-## 2. Session / Channel Concept
-A run is modeled as a unique `session_id` channel.
+## 2) Session/channel model
+Each run is represented by a unique `session_id`.
 
-### Session lifecycle (future)
-1. `start_session(session_id, game_id, player, commitment_meta)`
-2. gameplay actions generate transcript entries
-3. `end_session(session_id, final_commitment, score)`
-4. optional verifier checks transcript constraints
+Potential lifecycle:
+1. `start_session(session_id, player, game_id, metadata_commitment)`
+2. local gameplay emits ordered action records
+3. action transcript commitment is sealed
+4. score submission references session commitment
+5. optional verifier classifies run as verified/unverified
 
-## 3. Transcript Structure (future)
-Each entry may include:
+## 3) Pre-session integrity idea
+Before gameplay starts, future versions may include integrity evidence (for example attestation metadata), enabling stronger confidence in untampered client/runtime context.
+
+## 4) Action transcript concept
+Each record can include:
 - `session_id`
-- `counter` (monotonic)
-- `action_type`
-- `action_payload_hash`
-- `prev_hash`
-- `entry_hash`
+- monotonic counter
+- logical/game timestamp
+- action payload hash
+- previous record hash
+- record hash
 
-This forms a hash-linked chain of gameplay events.
+This creates a hash-linked transcript chain suitable for replay/audit pipelines.
 
-## 4. Commitment Strategies
-- Simple rolling hash commitment.
-- Merkle-root commitment over batched events.
-- Periodic checkpoint roots.
+## 5) Commitment layer
+Instead of storing all actions on-chain:
+- maintain transcript off-chain,
+- store periodic or final commitment root on-chain,
+- verify transcript consistency against root when needed.
 
-## 5. Verification Tiers
-### Tier 0 (MVP today)
-No cryptographic run validity proof.
+## 6) Verification tiers
+- **Tier 0 (MVP):** no run-proof verification.
+- **Tier 1:** session commitment checks and consistency rules.
+- **Tier 2:** replay/audit validator for suspicious runs.
+- **Tier 3:** optional zk/zkVM proof-backed verification and badge issuance.
 
-### Tier 1
-Session commitments + consistency checks.
+## 7) Verified badge concept
+Future leaderboard entries can include trust classes:
+- `published` (MVP default)
+- `verified_session` (commitment checks passed)
+- `proof_verified` (advanced verifier/proof passed)
 
-### Tier 2
-External attestation inputs (where feasible).
-
-### Tier 3
-Proof-based verification (zk/zkVM) for selected constraints.
-
-## 6. Example Constraints for Future Proofing
-- monotonic score progression bounds
-- valid jump timing windows
-- impossible physics transition rejection
-- no retroactive event insertion
-
-## 7. Practical Positioning
-For hackathon and early versions:
-- avoid claiming “cheat-proof”
-- claim “on-chain publication integrity”
-- present anti-cheat as an active roadmap with concrete architecture hooks already reserved
+## 8) Why this is deferred
+- Significant complexity and cost.
+- Requires dedicated correctness models for game rules.
+- Not required for demonstrating paid on-chain publication integrity in MVP.

@@ -1,62 +1,60 @@
 # Product Requirements Document (PRD)
 
-## 1. Problem
-Game leaderboards are either:
-- easy to spoof (client-only), or
-- opaque and centralized (server DB only).
+## 1) Problem
+Players want globally visible high scores with stronger integrity than a local or opaque centralized leaderboard.
 
-We need a leaderboard that is globally verifiable, while keeping gameplay fast and local.
+## 2) Vision
+A paid global leaderboard where each published score is tied to an on-chain Solana transaction.
 
-## 2. Product Vision
-A paid global leaderboard where publication requires Solana micro-payment and score records are written on-chain.
+## 3) MVP goals
+1. Free local gameplay and local leaderboard.
+2. Paid global score submission.
+3. On-chain best-score-per-player state.
+4. Global ranking reconstructed from chain data.
 
-## 3. Goals (MVP)
-1. Enable free local play and local ranking.
-2. Require payment for global score publication.
-3. Persist global score records on-chain.
-4. Rebuild top rankings using on-chain data only.
+## 4) Non-goals (MVP)
+- Full anti-cheat/tamper-resistance.
+- Per-action on-chain run logs.
+- zk score validity proofs.
+- Mainnet launch.
 
-## 4. Non-Goals (MVP)
-- Definitive anti-cheat prevention.
-- zk proof correctness for each run.
-- Full game-event transcript verification.
-- Mainnet economic tuning.
+## 5) Personas
+- **Player:** wants fast play and optional global rank.
+- **Competitive player:** willing to pay to publish rank.
+- **Judge/reviewer:** needs clear, verifiable architecture and realistic scope.
 
-## 5. Personas
-- **Casual player**: wants quick local progression.
-- **Competitive player**: wants globally visible ranked score.
-- **Judge/reviewer**: wants clear verifiable flow and technical honesty.
+## 6) Core user stories
+- Save local score without wallet.
+- Connect wallet and submit global score.
+- Pay submission fee and receive confirmation.
+- View global leaderboard sourced from chain state.
+- See whether score was unpublished (local) or published (global).
 
-## 6. Key User Stories
-- As a player, I can play and save local scores with no wallet.
-- As a player, I can connect wallet and pay to submit global score.
-- As a player, I can view global top scores sourced from chain data.
-- As a judge, I can verify submission tx and ranking derivation path.
+## 7) MVP feature set
+- Local score capture and local board UI.
+- Wallet integration for `submit_score`.
+- On-chain program update of best score.
+- Leaderboard API/client sort path.
 
-## 7. MVP Feature Set
-- Local leaderboard (browser/device storage)
-- Wallet connect (Devnet)
-- Paid global submission transaction
-- On-chain best-score-per-player record
-- Global leaderboard API/UI from chain scans
+## 8) Assumptions and constraints
+- Client-generated scores are trusted in MVP.
+- Global leaderboard integrity is on-chain.
+- Gameplay integrity is not fully enforced yet.
+- Blockchain is publication/source-of-truth layer, not full game execution layer.
 
-## 8. Success Metrics
-- >= 5 successful paid global submissions in demo.
-- Global top 10 reproducible from chain data.
-- End-to-end publish flow median under 60 seconds.
+## 9) Risks and tradeoffs
+- **Simple MVP vs strong anti-cheat:** chose MVP simplicity now.
+- **On-chain permanence vs storage cost:** store best-score only.
+- **Transparency vs cost:** avoid per-action logs in MVP.
+- **Client simplicity vs cryptographic assurance:** roadmap handles stronger verification later.
 
-## 9. Product Risks
-- RPC instability/rate limits.
-- Mobile wallet friction.
-- Score spoofing (known MVP limitation).
+## 10) Success criteria
+- Demonstrable paid global submissions on Devnet.
+- Top-N leaderboard reproducible from on-chain state.
+- End-to-end demo flow understandable in <3 minutes.
 
-## 10. Mitigations
-- Show explicit “MVP trust model” in UI/docs.
-- Basic score sanity constraints in program/client.
-- Reserve account fields for future anti-cheat commitments.
-
-## 11. Future Product Direction (non-MVP)
-- Session/channel model per run.
-- Binary attestation hooks.
-- Cryptographically linked action transcripts.
-- Verified-run badge tier with stronger proof requirements.
+## 11) Future anti-cheat direction (non-MVP)
+- Session/channel start + session ID.
+- Hash-linked action transcript.
+- Optional attestation/proof adapters.
+- Verified-run badge tier for stronger trust classes.
